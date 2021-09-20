@@ -1,27 +1,31 @@
 import 'package:auth_with_todo/modules/todo/domain/todo_entity.dart';
 import 'package:auth_with_todo/modules/todo/domain/todo_value_objects.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// This Data Transfer Object (DTO) is used transform data between infrastructure,
 /// and services layers to domain model layer.
 class TodoDto {
   TodoDto({
-    required this.id,
-    required this.complete,
-    required this.task,
-    this.note = '',
-  });
+    required id,
+    required complete,
+    required task,
+    note = '',
+  })  : _id = id,
+        _complete = complete,
+        _task = task,
+        _note = note;
 
-  final String id;
-  final bool complete;
-  final String task;
-  final String note;
+  final String _id;
+  final bool _complete;
+  final String _task;
+  final String _note;
 
   /// Convert to a Todo entity
   TodoEntity toDomain() => TodoEntity(
-        id: id,
-        complete: complete,
-        task: Task(task),
-        note: Note(note),
+        id: _id,
+        complete: _complete,
+        task: Task(_task),
+        note: Note(_note),
       );
 
   /// Convert a JSON object to a TodoDto
@@ -36,20 +40,29 @@ class TodoDto {
 
   /// Get a JSON object.
   Map<String, Object?> toJson() => {
-        'id': id,
-        'complete': complete,
-        'task': task,
-        'note': note,
+        'id': _id,
+        'complete': _complete,
+        'task': _task,
+        'note': _note,
       };
 
-  static TodoEntity fromSnapshot(DocumentSnapshot snap) {
-    final data = snap.data();
+  static TodoDto fromSnapshot(QueryDocumentSnapshot snap) {
+    final dynamic data = snap.data();
 
-    return TodoEntity(
+    if (data == null) throw Exception();
+
+    return TodoDto(
       id: data['id'],
-      task: data['task'],
       complete: data['complete'],
+      task: data['task'],
       note: data['note'],
     );
   }
+
+  Map<String, Object?> toDocument() => {
+        'id': _id,
+        'complete': _complete,
+        'task': _task,
+        'note': _note,
+      };
 }
