@@ -14,14 +14,6 @@ class TodoEntity extends Equatable {
     required this.note,
   });
 
-  // factory TodoEntity({
-  //   required id,
-  //   required complete,
-  //   required task,
-  //   note,
-  // }) =>
-  //     TodoEntity._(id: id, complete: complete, task: task, note: note);
-
   final String id;
   final bool complete;
   final Task task;
@@ -33,4 +25,15 @@ class TodoEntity extends Equatable {
   @override
   String toString() =>
       'TodoEntity { id: $id, complete: $complete, task: $task, note: $note }';
+
+  TodoEntity copyWith({
+    bool? complete,
+    Task? task,
+    Note? note,
+  }) =>
+      TodoEntity(
+          id: id,
+          complete: complete ?? this.complete,
+          task: task ?? this.task,
+          note: note ?? this.note);
 }
