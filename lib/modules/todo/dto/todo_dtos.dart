@@ -1,15 +1,17 @@
-import 'package:auth_with_todo/modules/todo/domain/todo_entity.dart';
-import 'package:auth_with_todo/modules/todo/domain/todo_value_objects.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '/modules/shared/unique_entity_id.dart';
+import '../domain/todo_entity.dart';
+import '../domain/todo_value_objects.dart';
+
 /// This Data Transfer Object (DTO) is used transform data between infrastructure,
-/// and services layers to domain model layer.
+/// and services layers to Todo domain model layer.
 class TodoDto {
-  TodoDto({
-    required id,
-    required complete,
-    required task,
-    note = '',
+  const TodoDto({
+    required String id,
+    required bool complete,
+    required String task,
+    String note = '',
   })  : _id = id,
         _complete = complete,
         _task = task,
@@ -20,17 +22,22 @@ class TodoDto {
   final String _task;
   final String _note;
 
+  static TodoDto fromEntity(TodoEntity todoEntity) => TodoDto(
+        id: todoEntity.id.toString(),
+        complete: todoEntity.complete,
+        task: todoEntity.task.toString(),
+        note: todoEntity.note.toString(),
+      );
+
   /// Convert to a Todo entity
   TodoEntity toDomain() => TodoEntity(
-        id: _id,
+        id: UniqueId(_id),
         complete: _complete,
         task: Task(_task),
         note: Note(_note),
       );
 
   /// Convert a JSON object to a TodoDto
-  // Factory constructor is initializing a final variable using logic that
-  // can’t be handled in the initializer list.
   static TodoDto fromJson(Map<String, Object> json) => TodoDto(
         id: json['id'] as String,
         complete: json['complete'] as bool,
@@ -38,7 +45,7 @@ class TodoDto {
         note: json['note'] as String,
       );
 
-  /// Get a JSON object.
+  /// Convert to a JSON object.
   Map<String, Object?> toJson() => {
         'id': _id,
         'complete': _complete,
@@ -46,10 +53,12 @@ class TodoDto {
         'note': _note,
       };
 
-  static TodoDto fromSnapshot(QueryDocumentSnapshot snap) {
-    final dynamic data = snap.data();
+  /// Convert from snapshot of Firestore to DTO.
+  static TodoDto fromSnapshot(
+      QueryDocumentSnapshot<Map<String, dynamic>> snap) {
+    final Map<String, dynamic> data = snap.data();
 
-    if (data == null) throw Exception();
+    // if (data == null) throw Exception('Data=$data is null');
 
     return TodoDto(
       id: data['id'],
@@ -58,11 +67,4 @@ class TodoDto {
       note: data['note'],
     );
   }
-
-  Map<String, Object?> toDocument() => {
-        'id': _id,
-        'complete': _complete,
-        'task': _task,
-        'note': _note,
-      };
 }
